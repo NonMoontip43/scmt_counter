@@ -74,7 +74,7 @@ void loop()
 {
     spotCounterTargetSegment();
     workCounterTargetSegment();
-    spotCounterSegment();
+    spotCounterSegment(); //Function นับจำนวน Spot เมื่อมีการ กด Button Spot + เพิ่มขึ้น
     resetButton();
 }
 
