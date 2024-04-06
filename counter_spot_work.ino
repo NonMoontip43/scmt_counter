@@ -7,10 +7,10 @@ const int spotCounterUpBtn = 12; // spot up count
 const int spotCounterDownBtn = 14; // spot down count
 float pressLength_spotCounterBtn_milliSeconds = 0;
 int optionTwo_spotCounterBtn_milliSeconds = 500;
+int optionThree_spotCounterBtn_milliSeconds = 2000;
 
 const int spot_swapDigit = 47;
 float pressLength_spotCounterTargetBtn_milliSeconds = 0;
-int optionTwo_spotCounterTargetBtn_milliSeconds = 500;
 
 const int resetBtn = 8;
 float pressLength_milliSeconds = 0;
@@ -21,12 +21,15 @@ const int CLK2 = 5;
 const int spotCounterTargetUpBtn = 13; // spot target up
 const int spotCounterTargetDownBtn = 16; // spot target down
 float pressLength_workCounterBtn_milliSeconds = 0;
-int optionTwo_workCounterBtn_milliSeconds = 500;
+int optionTwo_spotCounterTargetBtn_milliSeconds = 500;
+int optionThree_spotCounterTargetBtn_milliSeconds = 2000;
 
 const int DIO3 = 53;
 const int CLK3 = 51;
 const int workCounterUpBtn = 29;
 const int workCounterDownBtn = 30;
+int optionTwo_workCounterBtn_milliSeconds = 500;
+int optionThree_workCounterBtn_milliSeconds = 2000;
 
 const int DIO4 = 33;
 const int CLK4 = 31;
@@ -36,6 +39,7 @@ const int manualSwitchInput = 39;
 const int autoSwitchInput = 42;
 float pressLength_workCounterTargetBtn_milliSeconds = 0;
 int optionTwo_workCounterTargetBtn_milliSeconds = 500;
+int optionThree_workCounterTargetBtn_milliSeconds = 2000;
 
 int numCounter = 0;
 int spotCounterState = 0;
@@ -47,6 +51,8 @@ int y = 0; // spotCounterTarget
 int z = 0; // workCounter
 int a = 0; // workCounterTarget
 
+const int buzzer = 26;
+
 TM1637Display display(CLK, DIO); //set up the 4-Digit Display.
 TM1637Display display2(CLK2, DIO2); //set up the 4-Digit Display.
 TM1637Display display3(CLK3, DIO3); //set up the 4-Digit Display.
@@ -57,14 +63,17 @@ void setup()
   Serial.begin(9600);
   setPinMode();
   set7segment();
+  digitalWrite(buzzer,HIGH);
 }
 
 void loop()
 {
     spotCounterTargetSegment();
     workCounterTargetSegment();
+    workCounterSegment();
     spotCounterSegment(); //Function นับจำนวน Spot เมื่อมีการ กด Button Spot + เพิ่มขึ้น
     resetButton();
+    buzzerLimit();
 }
 
 void setPinMode(){
@@ -79,6 +88,7 @@ void setPinMode(){
   pinMode(autoSwitchInput, INPUT_PULLUP);
   pinMode(manualSwitchInput, INPUT_PULLUP);
   pinMode(resetBtn , INPUT_PULLUP);
+  pinMode(buzzer , OUTPUT); 
 }
 
 void set7segment(){  
@@ -96,17 +106,16 @@ void set7segment(){
 void spotCounterSegment(){
   while(digitalRead(spotCounterUpBtn) == LOW)
   {
-    delay(100);
-    if(pressLength_spotCounterBtn_milliSeconds == 0 && y != 0){
+    if(pressLength_spotCounterBtn_milliSeconds < optionThree_spotCounterBtn_milliSeconds) delay(100);
+    if(pressLength_spotCounterBtn_milliSeconds == 0 && y != 0 || (pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds && y != 0)){
       x++;
       display.showNumberDec(x);
       if(x == y) {
         x = 0;
-        digitalWrite(10 , HIGH);
-        delay(1000);
-        digitalWrite(10 , LOW);
-        z++;
-        display3.showNumberDec(z);
+        if(a != 0 && z != a) {
+          z++;
+          display3.showNumberDec(z);
+        }
         display.showNumberDec(x);
       }
     }
@@ -114,14 +123,18 @@ void spotCounterSegment(){
   } 
   while(digitalRead(spotCounterDownBtn) == LOW)
   {
-    delay(100);
-    if(pressLength_spotCounterBtn_milliSeconds == 0 && x != 0){
-      x--;
+    if(pressLength_spotCounterBtn_milliSeconds < optionThree_spotCounterBtn_milliSeconds) delay(100);
+    if(pressLength_spotCounterBtn_milliSeconds == 0 && x != 0 || (pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds && x != 0)){
+      if(x > 0) {
+        x--;
+      }else x = 0;
       display.showNumberDec(x);
     }
     pressLength_spotCounterBtn_milliSeconds = pressLength_spotCounterBtn_milliSeconds + 100;
   } 
   if((pressLength_spotCounterBtn_milliSeconds + 400) >= optionTwo_spotCounterBtn_milliSeconds){
+    pressLength_spotCounterBtn_milliSeconds = 0;
+  }else if(pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds){
     pressLength_spotCounterBtn_milliSeconds = 0;
   }
 }
@@ -129,78 +142,82 @@ void spotCounterSegment(){
 void workCounterSegment(){
   while(digitalRead(workCounterUpBtn) == LOW && digitalRead(manualSwitchInput) == LOW)
   {
-    delay(100);
-    if(pressLength_workCounterBtn_milliSeconds == 0){
-      z++;
-      display.showNumberDec(z);
-      if(z == a) {
-        z = 0;
-        digitalWrite(10 , HIGH);
-        delay(1000);
-        digitalWrite(10 , LOW);
-        a++;
-        display3.showNumberDec(a);
-        display.showNumberDec(z);
+    if(pressLength_workCounterBtn_milliSeconds < optionThree_workCounterBtn_milliSeconds) delay(100);
+    if(pressLength_workCounterBtn_milliSeconds == 0 || (pressLength_workCounterBtn_milliSeconds >= optionThree_workCounterBtn_milliSeconds)){
+      if(z <= a && a != 0){
+        z++;
+        display3.showNumberDec(z);
       }
     }
     pressLength_workCounterBtn_milliSeconds = pressLength_workCounterBtn_milliSeconds + 100;
   }
-  while(digitalRead(workCounterUpBtn) == LOW && digitalRead(manualSwitchInput) == LOW)
+  while(digitalRead(workCounterDownBtn) == LOW && digitalRead(manualSwitchInput) == LOW)
   {
-    delay(100);
-    if(pressLength_workCounterBtn_milliSeconds == 0){
-      z--;
-      display.showNumberDec(z);
+    if(pressLength_workCounterBtn_milliSeconds < optionThree_workCounterBtn_milliSeconds) delay(100);
+    if(pressLength_workCounterBtn_milliSeconds == 0 || (pressLength_workCounterBtn_milliSeconds >= optionThree_workCounterBtn_milliSeconds)){
+      if(z > 0){
+        z--;
+      }else z = 0;
+      display3.showNumberDec(z);
     }
     pressLength_workCounterBtn_milliSeconds = pressLength_workCounterBtn_milliSeconds + 100;
   }
   
   if((pressLength_workCounterBtn_milliSeconds + 400) >= optionTwo_workCounterBtn_milliSeconds){
     pressLength_workCounterBtn_milliSeconds = 0;
+  }else if(pressLength_workCounterBtn_milliSeconds >= optionThree_workCounterBtn_milliSeconds){
+    pressLength_workCounterBtn_milliSeconds = 0;
   }
 }
 
 void spotCounterTargetSegment(){
   while(digitalRead(manualSwitchInput) == LOW && digitalRead(spotCounterTargetUpBtn) == LOW && digitalRead(resetBtn) != LOW){
-    delay(100);
-    if(pressLength_spotCounterBtn_milliSeconds == 0){
+    if(pressLength_spotCounterTargetBtn_milliSeconds < optionThree_spotCounterTargetBtn_milliSeconds) delay(100);
+    if(pressLength_spotCounterTargetBtn_milliSeconds == 0 || (pressLength_spotCounterTargetBtn_milliSeconds >= optionThree_spotCounterTargetBtn_milliSeconds)){
         y++;
-        display.showNumberDec(y);
+        display2.showNumberDec(y);
       }
-    pressLength_spotCounterBtn_milliSeconds = pressLength_spotCounterBtn_milliSeconds + 100;
+    pressLength_spotCounterTargetBtn_milliSeconds = pressLength_spotCounterTargetBtn_milliSeconds + 100;
   }
   while(digitalRead(manualSwitchInput) == LOW && digitalRead(spotCounterTargetDownBtn) == LOW && digitalRead(resetBtn) != LOW){
-    delay(100);
-    if(pressLength_spotCounterBtn_milliSeconds == 0){
-        y--;
-        display.showNumberDec(y);
+    if(pressLength_spotCounterTargetBtn_milliSeconds < optionThree_spotCounterTargetBtn_milliSeconds) delay(100);
+    if(pressLength_spotCounterTargetBtn_milliSeconds == 0 || (pressLength_spotCounterTargetBtn_milliSeconds >= optionThree_spotCounterTargetBtn_milliSeconds)){
+        if(y > 0){
+          y--;
+        }else y = 0;
+        display2.showNumberDec(y);
       }
-    pressLength_spotCounterBtn_milliSeconds = pressLength_spotCounterBtn_milliSeconds + 100;
+    pressLength_spotCounterTargetBtn_milliSeconds = pressLength_spotCounterTargetBtn_milliSeconds + 100;
   }
   if(pressLength_spotCounterTargetBtn_milliSeconds >= optionTwo_spotCounterTargetBtn_milliSeconds){
+      pressLength_spotCounterTargetBtn_milliSeconds = 0;
+    }else if(pressLength_spotCounterTargetBtn_milliSeconds >= optionThree_spotCounterTargetBtn_milliSeconds){
       pressLength_spotCounterTargetBtn_milliSeconds = 0;
     }
   }
     
-
 void workCounterTargetSegment(){
   while(digitalRead(manualSwitchInput) == LOW && digitalRead(workCounterTargetUpBtn) == LOW && digitalRead(resetBtn) != LOW){
-    delay(100);
-    if(pressLength_workCounterTargetBtn_milliSeconds == 0){
+    if(pressLength_workCounterTargetBtn_milliSeconds < optionThree_workCounterTargetBtn_milliSeconds) delay(100);
+    if(pressLength_workCounterTargetBtn_milliSeconds == 0 || (pressLength_workCounterTargetBtn_milliSeconds >= optionThree_workCounterTargetBtn_milliSeconds)){
         a++;
-        display.showNumberDec(a);
+        display4.showNumberDec(a);
       }
     pressLength_workCounterTargetBtn_milliSeconds = pressLength_workCounterTargetBtn_milliSeconds + 100;
   }
   while(digitalRead(manualSwitchInput) == LOW && digitalRead(workCounterTargetDownBtn) == LOW && digitalRead(resetBtn) != LOW){
-    delay(100);
-    if(pressLength_workCounterTargetBtn_milliSeconds == 0){
-        a--;
-        display.showNumberDec(a);
+    if(pressLength_workCounterTargetBtn_milliSeconds < optionThree_workCounterTargetBtn_milliSeconds) delay(100);
+    if(pressLength_workCounterTargetBtn_milliSeconds == 0 || (pressLength_workCounterTargetBtn_milliSeconds >= optionThree_workCounterTargetBtn_milliSeconds)){
+        if(a > 0){
+          a--;
+        }else a = 0;
+        display4.showNumberDec(a);
       }
     pressLength_workCounterTargetBtn_milliSeconds = pressLength_workCounterTargetBtn_milliSeconds + 100;
   }
   if(pressLength_workCounterTargetBtn_milliSeconds >= optionTwo_workCounterTargetBtn_milliSeconds){
+      pressLength_workCounterTargetBtn_milliSeconds = 0;
+  }else if(pressLength_workCounterTargetBtn_milliSeconds >= optionThree_workCounterTargetBtn_milliSeconds){
       pressLength_workCounterTargetBtn_milliSeconds = 0;
   }
 }
@@ -213,6 +230,7 @@ void resetButton(){
     if(pressLength_milliSeconds >= optionTwo_milliSeconds){
       x = 0;
       z = 0;
+      digitalWrite(buzzer,HIGH);
       display.showNumberDec(x);
       display3.showNumberDec(z);
       pressLength_milliSeconds = 0;
@@ -220,6 +238,13 @@ void resetButton(){
   }
 }
 
+void buzzerLimit(){
+  while (digitalRead(resetBtn) != LOW && z == a && z != 0 && a != 0)
+  {
+    digitalWrite(buzzer, LOW);
+  }
+  
+}
 // void spotCounterTargetSegment(){
 //   while(digitalRead(spotCounterTargetBtn) == HIGH && digitalRead(manual) == HIGH){
 //     delay(100);
