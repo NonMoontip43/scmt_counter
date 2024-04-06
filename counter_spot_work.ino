@@ -3,12 +3,11 @@
 
 const int CLK = 3; //Set the CLK pin connection to the display
 const int DIO = 2; //Set the DIO pin connection to the display
-const int spotCounterBtn = 12;
+const int spotCounterUpBtn = 12; // spot up count
+const int spotCounterDownBtn = 14; // spot down count
 float pressLength_spotCounterBtn_milliSeconds = 0;
 int optionTwo_spotCounterBtn_milliSeconds = 500;
 
-const int spotCounterTargetBtn = 13;
-const int manual = 49;
 const int spot_swapDigit = 47;
 float pressLength_spotCounterTargetBtn_milliSeconds = 0;
 int optionTwo_spotCounterTargetBtn_milliSeconds = 500;
@@ -18,16 +17,23 @@ float pressLength_milliSeconds = 0;
 int optionTwo_milliSeconds = 2000; 
 
 const int DIO2 = 7;
-const int CLK2 = 5; //Set the CLK pin connection to the display
+const int CLK2 = 5;
+const int spotCounterTargetUpBtn = 13; // spot target up
+const int spotCounterTargetDownBtn = 16; // spot target down
+float pressLength_workCounterBtn_milliSeconds = 0;
+int optionTwo_workCounterBtn_milliSeconds = 500;
 
 const int DIO3 = 53;
 const int CLK3 = 51;
+const int workCounterUpBtn = 29;
+const int workCounterDownBtn = 30;
 
 const int DIO4 = 33;
 const int CLK4 = 31;
+const int workCounterTargetUpBtn = 41;
+const int workCounterTargetDownBtn = 43;
 const int manualSwitchInput = 39;
 const int autoSwitchInput = 42;
-const int workCounterTargetBtn = 41;
 float pressLength_workCounterTargetBtn_milliSeconds = 0;
 int optionTwo_workCounterTargetBtn_milliSeconds = 500;
 
@@ -35,28 +41,11 @@ int numCounter = 0;
 int spotCounterState = 0;
 int spotCounterTargetState = 0;
 int resetState = 0;
-int x = 0;
-int y = 0;
-int z = 0;
-int a = 0;
 
-int switchDigit = 0;
-int w_switchDigit = 0;
-int s_currentDigit = 4;
-int w_currentDigit = 4;
-int digit = 0;
-bool state = false;
-bool w_state = false;
-
-int s_digit0 = 0;
-int s_digit1 = 0;
-int s_digit2 = 0;
-int s_digit3 = 0;
-
-int w_digit0 = 0;
-int w_digit1 = 0;
-int w_digit2 = 0;
-int w_digit3 = 0;
+int x = 0; // spotCounter 
+int y = 0; // spotCounterTarget
+int z = 0; // workCounter
+int a = 0; // workCounterTarget
 
 TM1637Display display(CLK, DIO); //set up the 4-Digit Display.
 TM1637Display display2(CLK2, DIO2); //set up the 4-Digit Display.
@@ -79,15 +68,17 @@ void loop()
 }
 
 void setPinMode(){
-  pinMode(spotCounterBtn, INPUT_PULLUP);
-  pinMode(spotCounterTargetBtn, OUTPUT);
-  pinMode(manual, OUTPUT);
-  pinMode(spot_swapDigit, OUTPUT);
-  pinMode(autoSwitchInput, OUTPUT);
-  pinMode(manualSwitchInput, OUTPUT);
-  pinMode(workCounterTargetBtn, OUTPUT);
-  pinMode(resetBtn , OUTPUT);
-  pinMode(10 , OUTPUT);
+  pinMode(spotCounterUpBtn, INPUT_PULLUP);
+  pinMode(spotCounterDownBtn, INPUT_PULLUP);
+  pinMode(spotCounterTargetUpBtn, INPUT_PULLUP);
+  pinMode(spotCounterTargetDownBtn, INPUT_PULLUP);
+  pinMode(workCounterUpBtn , INPUT_PULLUP);
+  pinMode(workCounterDownBtn , INPUT_PULLUP);
+  pinMode(workCounterTargetUpBtn, INPUT_PULLUP);
+  pinMode(workCounterTargetDownBtn, INPUT_PULLUP);
+  pinMode(autoSwitchInput, INPUT_PULLUP);
+  pinMode(manualSwitchInput, INPUT_PULLUP);
+  pinMode(resetBtn , INPUT_PULLUP);
 }
 
 void set7segment(){  
@@ -103,9 +94,8 @@ void set7segment(){
 
 
 void spotCounterSegment(){
-  while(digitalRead(spotCounterBtn) == LOW)
+  while(digitalRead(spotCounterUpBtn) == LOW)
   {
-    Serial.println("spontCounter");
     delay(100);
     if(pressLength_spotCounterBtn_milliSeconds == 0 && y != 0){
       x++;
@@ -122,164 +112,101 @@ void spotCounterSegment(){
     }
     pressLength_spotCounterBtn_milliSeconds = pressLength_spotCounterBtn_milliSeconds + 100;
   } 
+  while(digitalRead(spotCounterDownBtn) == LOW)
+  {
+    delay(100);
+    if(pressLength_spotCounterBtn_milliSeconds == 0 && x != 0){
+      x--;
+      display.showNumberDec(x);
+    }
+    pressLength_spotCounterBtn_milliSeconds = pressLength_spotCounterBtn_milliSeconds + 100;
+  } 
   if((pressLength_spotCounterBtn_milliSeconds + 400) >= optionTwo_spotCounterBtn_milliSeconds){
     pressLength_spotCounterBtn_milliSeconds = 0;
   }
 }
 
-void spotCounterTargetSegment(){
-  while(digitalRead(manualSwitchInput) == LOW && digitalRead(spotCounterBtn) != HIGH && digitalRead(resetBtn) != HIGH && digitalRead(manual) == HIGH){
+void workCounterSegment(){
+  while(digitalRead(workCounterUpBtn) == LOW && digitalRead(manualSwitchInput) == LOW)
+  {
     delay(100);
-      while(digitalRead(spot_swapDigit) == HIGH){
-        delay(100);
-        switchDigit += 100;
-      }
-     if(switchDigit >= 2000){
-          state = false;
-          switchDigit = 0;
-          s_currentDigit = 4;
-          y = (String(s_digit0) + String(s_digit1) + String(s_digit2) + String(s_digit3)).toInt();
-          display2.showNumberDec(y);
-        }else if(switchDigit >= 100){
-          state = true;
-          switchDigit = 0;
-          if(s_currentDigit == -1) s_currentDigit = 4;
-          else {
-            s_currentDigit--;
-            y = (String(s_digit0) + String(s_digit1) + String(s_digit2) + String(s_digit3)).toInt();
-            display2.showNumberDec(y);
-            digit = 0;
-          }
-      }
-    if(s_currentDigit != 4) {
-      if(s_currentDigit == 3){
-        display2.showNumberDec(s_digit3 , false , 1 , s_currentDigit);
-        delay(500);
-        display2.setSegments(0xff , 1 , s_currentDigit);
-        delay(500);
-        display2.showNumberDec(s_digit3 , false , 1 , s_currentDigit);
-      }else if(s_currentDigit == 2){
-        display2.showNumberDec(s_digit2 , false , 1 , s_currentDigit);
-        delay(500);
-        display2.setSegments(0xff , 1 , s_currentDigit);
-        delay(500);
-        display2.showNumberDec(s_digit2 , false , 1 , s_currentDigit);
-      }else if(s_currentDigit == 1){
-        display2.showNumberDec(s_digit1 , false , 1 , s_currentDigit);
-        delay(500);
-        display2.setSegments(0xff , 1 , s_currentDigit);
-        delay(500);
-        display2.showNumberDec(s_digit1 , false , 1 , s_currentDigit);
-      }else if(s_currentDigit == 0){
-        display2.showNumberDec(s_digit0 , false , 1 , s_currentDigit);
-        delay(500);
-        display2.setSegments(0xff , 1 , s_currentDigit);
-        delay(500);
-        display2.showNumberDec(s_digit0 , false , 1 , s_currentDigit);
+    if(pressLength_workCounterBtn_milliSeconds == 0){
+      z++;
+      display.showNumberDec(z);
+      if(z == a) {
+        z = 0;
+        digitalWrite(10 , HIGH);
+        delay(1000);
+        digitalWrite(10 , LOW);
+        a++;
+        display3.showNumberDec(a);
+        display.showNumberDec(z);
       }
     }
-    if(state && digitalRead(spotCounterTargetBtn) == HIGH){
-      if(pressLength_spotCounterTargetBtn_milliSeconds >= 0 && s_currentDigit == 3){
-        s_digit3+=1;
-        display2.showNumberDec(s_digit3 , false , 1 , 3);
-      }else if(pressLength_spotCounterTargetBtn_milliSeconds >= 0 && s_currentDigit == 2){
-        s_digit2+=1;
-        display2.showNumberDec(s_digit2 , false , 1 , 2);
-      }
-      else if(pressLength_spotCounterTargetBtn_milliSeconds >= 0 && s_currentDigit == 1){
-        s_digit1+=1;
-        display2.showNumberDec(s_digit1 , false , 1 , 1);
-      }
-      else if(pressLength_spotCounterTargetBtn_milliSeconds >= 0 && s_currentDigit == 0){
-        s_digit0+=1;
-        display2.showNumberDec(s_digit0 , false , 1 , 0);
-      }
-      pressLength_spotCounterTargetBtn_milliSeconds = pressLength_spotCounterTargetBtn_milliSeconds + 100;
+    pressLength_workCounterBtn_milliSeconds = pressLength_workCounterBtn_milliSeconds + 100;
+  }
+  while(digitalRead(workCounterUpBtn) == LOW && digitalRead(manualSwitchInput) == LOW)
+  {
+    delay(100);
+    if(pressLength_workCounterBtn_milliSeconds == 0){
+      z--;
+      display.showNumberDec(z);
     }
-    if(pressLength_spotCounterTargetBtn_milliSeconds >= optionTwo_spotCounterTargetBtn_milliSeconds){
+    pressLength_workCounterBtn_milliSeconds = pressLength_workCounterBtn_milliSeconds + 100;
+  }
+  
+  if((pressLength_workCounterBtn_milliSeconds + 400) >= optionTwo_workCounterBtn_milliSeconds){
+    pressLength_workCounterBtn_milliSeconds = 0;
+  }
+}
+
+void spotCounterTargetSegment(){
+  while(digitalRead(manualSwitchInput) == LOW && digitalRead(spotCounterTargetUpBtn) == LOW && digitalRead(resetBtn) != LOW){
+    delay(100);
+    if(pressLength_spotCounterBtn_milliSeconds == 0){
+        y++;
+        display.showNumberDec(y);
+      }
+    pressLength_spotCounterBtn_milliSeconds = pressLength_spotCounterBtn_milliSeconds + 100;
+  }
+  while(digitalRead(manualSwitchInput) == LOW && digitalRead(spotCounterTargetDownBtn) == LOW && digitalRead(resetBtn) != LOW){
+    delay(100);
+    if(pressLength_spotCounterBtn_milliSeconds == 0){
+        y--;
+        display.showNumberDec(y);
+      }
+    pressLength_spotCounterBtn_milliSeconds = pressLength_spotCounterBtn_milliSeconds + 100;
+  }
+  if(pressLength_spotCounterTargetBtn_milliSeconds >= optionTwo_spotCounterTargetBtn_milliSeconds){
       pressLength_spotCounterTargetBtn_milliSeconds = 0;
     }
   }
-  
-}
+    
 
 void workCounterTargetSegment(){
-  while(digitalRead(spot_swapDigit) != HIGH && digitalRead(spotCounterBtn) != HIGH && digitalRead(resetBtn) != HIGH && digitalRead(manual) == HIGH){
+  while(digitalRead(manualSwitchInput) == LOW && digitalRead(workCounterTargetUpBtn) == LOW && digitalRead(resetBtn) != LOW){
     delay(100);
-      while(digitalRead(manualSwitchInput) == LOW){
-        delay(100);
-        w_switchDigit += 100;
+    if(pressLength_workCounterTargetBtn_milliSeconds == 0){
+        a++;
+        display.showNumberDec(a);
       }
-     if(w_switchDigit >= 2000){
-          w_state = false;
-          w_switchDigit = 0;
-          w_currentDigit = 4;
-          a = (String(w_digit0) + String(w_digit1) + String(w_digit2) + String(w_digit3)).toInt();
-          display4.showNumberDec(a);
-        }else if(w_switchDigit >= 100){
-          w_state = true;
-          w_switchDigit = 0;
-          if(w_currentDigit == -1) w_currentDigit = 4;
-          else {
-            w_currentDigit--;
-            a = (String(w_digit0) + String(w_digit1) + String(w_digit2) + String(w_digit3)).toInt();
-            display4.showNumberDec(a);
-            digit = 0;
-          }
+    pressLength_workCounterTargetBtn_milliSeconds = pressLength_workCounterTargetBtn_milliSeconds + 100;
+  }
+  while(digitalRead(manualSwitchInput) == LOW && digitalRead(workCounterTargetDownBtn) == LOW && digitalRead(resetBtn) != LOW){
+    delay(100);
+    if(pressLength_workCounterTargetBtn_milliSeconds == 0){
+        a--;
+        display.showNumberDec(a);
       }
-    if(w_currentDigit != 4) {
-      if(w_currentDigit == 3){
-        display4.showNumberDec(w_digit3 , false , 1 , w_currentDigit);
-        delay(500);
-        display4.setSegments(0xff , 1 , w_currentDigit);
-        delay(500);
-        display4.showNumberDec(w_digit3 , false , 1 , w_currentDigit);
-      }else if(w_currentDigit == 2){
-        display4.showNumberDec(w_digit2 , false , 1 , w_currentDigit);
-        delay(500);
-        display4.setSegments(0xff , 1 , w_currentDigit);
-        delay(500);
-        display4.showNumberDec(w_digit2 , false , 1 , w_currentDigit);
-      }else if(w_currentDigit == 1){
-        display4.showNumberDec(w_digit1 , false , 1 , w_currentDigit);
-        delay(500);
-        display4.setSegments(0xff , 1 , w_currentDigit);
-        delay(500);
-        display4.showNumberDec(w_digit1 , false , 1 , w_currentDigit);
-      }else if(w_currentDigit == 0){
-        display4.showNumberDec(w_digit0 , false , 1 , w_currentDigit);
-        delay(500);
-        display4.setSegments(0xff , 1 , w_currentDigit);
-        delay(500);
-        display4.showNumberDec(w_digit0 , false , 1 , w_currentDigit);
-      }
-    }
-    if(w_state && digitalRead(workCounterTargetBtn) == HIGH){
-      if(pressLength_workCounterTargetBtn_milliSeconds >= 0 && w_currentDigit == 3){
-        w_digit3+=1;
-        display4.showNumberDec(w_digit3 , false , 1 , 3);
-      }else if(pressLength_workCounterTargetBtn_milliSeconds >= 0 && w_currentDigit == 2){
-        w_digit2+=1;
-        display4.showNumberDec(w_digit2 , false , 1 , 2);
-      }
-      else if(pressLength_workCounterTargetBtn_milliSeconds >= 0 && w_currentDigit == 1){
-        w_digit1+=1;
-        display4.showNumberDec(w_digit1 , false , 1 , 1);
-      }
-      else if(pressLength_workCounterTargetBtn_milliSeconds >= 0 && w_currentDigit == 0){
-        w_digit0+=1;
-        display4.showNumberDec(w_digit0 , false , 1 , 0);
-      }
-      pressLength_workCounterTargetBtn_milliSeconds = pressLength_workCounterTargetBtn_milliSeconds + 100;
-    }
-    if(pressLength_workCounterTargetBtn_milliSeconds >= optionTwo_workCounterTargetBtn_milliSeconds){
+    pressLength_workCounterTargetBtn_milliSeconds = pressLength_workCounterTargetBtn_milliSeconds + 100;
+  }
+  if(pressLength_workCounterTargetBtn_milliSeconds >= optionTwo_workCounterTargetBtn_milliSeconds){
       pressLength_workCounterTargetBtn_milliSeconds = 0;
-    }
   }
 }
 
 void resetButton(){
-  while(digitalRead(resetBtn) == HIGH && digitalRead(manual) == HIGH)
+  while(digitalRead(resetBtn) == LOW && digitalRead(manualSwitchInput) == LOW)
   {
     delay(100);
     pressLength_milliSeconds = pressLength_milliSeconds + 100;
