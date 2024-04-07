@@ -62,9 +62,9 @@ void setup()
 {
   Serial.begin(9600);
   setPinMode();
+  readEEPROM();
   set7segment();
   digitalWrite(buzzer,HIGH);
-  readEEPROM();
 }
 
 void loop()
@@ -81,19 +81,19 @@ void readEEPROM(){
   //read Data in EEPROM if have data is set data to parameter
   if(EEPROM.read(1) > 0)
   {
-    x = EERPOM.read(1);
+    x = EEPROM.read(1);
   }
   if(EEPROM.read(2) > 0)
   {
-    y = EERPOM.read(2);
+    y = EEPROM.read(2);
   }  
   if(EEPROM.read(3) > 0)
   {
-    z = EERPOM.read(3);
+    z = EEPROM.read(3);
   }  
   if(EEPROM.read(4) > 0)
   {
-    a = EERPOM.read(4);
+    a = EEPROM.read(4);
   }
 }
 
@@ -282,7 +282,7 @@ void spotCounterTargetSegment(){
       }
     pressLength_spotCounterTargetBtn_milliSeconds = pressLength_spotCounterTargetBtn_milliSeconds + 100;
   }
-  if(pressLength_spotCounterTargetBtn_milliSeconds >= optionTwo_spotCounterTargetBtn_milliSeconds){
+  if((pressLength_spotCounterTargetBtn_milliSeconds+400) >= optionTwo_spotCounterTargetBtn_milliSeconds){
       pressLength_spotCounterTargetBtn_milliSeconds = 0;
     }else if(pressLength_spotCounterTargetBtn_milliSeconds >= optionThree_spotCounterTargetBtn_milliSeconds){
       pressLength_spotCounterTargetBtn_milliSeconds = 0;
@@ -326,7 +326,7 @@ void workCounterTargetSegment(){
       }
     pressLength_workCounterTargetBtn_milliSeconds = pressLength_workCounterTargetBtn_milliSeconds + 100;
   }
-  if(pressLength_workCounterTargetBtn_milliSeconds >= optionTwo_workCounterTargetBtn_milliSeconds){
+  if((pressLength_workCounterTargetBtn_milliSeconds+400) >= optionTwo_workCounterTargetBtn_milliSeconds){
       pressLength_workCounterTargetBtn_milliSeconds = 0;
   }else if(pressLength_workCounterTargetBtn_milliSeconds >= optionThree_workCounterTargetBtn_milliSeconds){
       pressLength_workCounterTargetBtn_milliSeconds = 0;
