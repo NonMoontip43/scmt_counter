@@ -1,6 +1,8 @@
 #include <TM1637Display.h>
 #include <EEPROM.h>
 
+const int autoInput = 10;
+
 const int CLK = 3; //Set the CLK pin connection to the display
 const int DIO = 2; //Set the DIO pin connection to the display
 const int spotCounterUpBtn = 12; // spot up count
@@ -69,12 +71,21 @@ void setup()
 
 void loop()
 {
+    autoMode();
     spotCounterTargetSegment();
     workCounterTargetSegment();
     workCounterSegment();
-    spotCounterSegment(); //Function นับจำนวน Spot เมื่อมีการ กด Button Spot + เพิ่มขึ้น
+    spotCounterSegment(false); //Function นับจำนวน Spot เมื่อมีการ กด Button Spot + เพิ่มขึ้น
     resetButton();
     buzzerLimit();
+}
+
+void autoMode(){
+  while (digitalRead(autoSwitchInput) == LOW)
+  {
+    spotCounterSegment(true);
+  }
+  spotCounterSegment(false);
 }
 
 void readEEPROM(){
@@ -98,6 +109,7 @@ void readEEPROM(){
 }
 
 void setPinMode(){
+  pinMode(autoInput, INPUT_PULLUP);
   pinMode(spotCounterUpBtn, INPUT_PULLUP);
   pinMode(spotCounterDownBtn, INPUT_PULLUP);
   pinMode(spotCounterTargetUpBtn, INPUT_PULLUP);
@@ -124,12 +136,16 @@ void set7segment(){
 }
 
 
-void spotCounterSegment(){
-  while(digitalRead(spotCounterUpBtn) == LOW)
+void spotCounterSegment(bool active){
+  while((digitalRead(spotCounterUpBtn) == LOW && digitalRead(manualSwitchInput) == LOW) || (digitalRead(autoInput) == LOW && active))
   {
     if(pressLength_spotCounterBtn_milliSeconds < optionThree_spotCounterBtn_milliSeconds) delay(100);
     if(pressLength_spotCounterBtn_milliSeconds == 0 && y != 0 || (pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds && y != 0)){
-      x++;
+      if(pressLength_spotCounterBtn_milliSeconds >= (35000)){
+        x+=10;
+      }else{
+        x++;
+      }
       display.showNumberDec(x);
       //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
       if(EEPROM.read(1) > 0)
@@ -169,12 +185,16 @@ void spotCounterSegment(){
     }
     pressLength_spotCounterBtn_milliSeconds = pressLength_spotCounterBtn_milliSeconds + 100;
   } 
-  while(digitalRead(spotCounterDownBtn) == LOW)
+  while((digitalRead(spotCounterDownBtn) == LOW && digitalRead(manualSwitchInput) == LOW))
   {
     if(pressLength_spotCounterBtn_milliSeconds < optionThree_spotCounterBtn_milliSeconds) delay(100);
     if(pressLength_spotCounterBtn_milliSeconds == 0 && x != 0 || (pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds && x != 0)){
       if(x > 0) {
-        x--;
+        if(pressLength_spotCounterBtn_milliSeconds >= 35000){
+          x-=10;
+        }else{
+          x--;
+        }
       }else x = 0;
       display.showNumberDec(x);
        //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
@@ -202,7 +222,9 @@ void workCounterSegment(){
     if(pressLength_workCounterBtn_milliSeconds < optionThree_workCounterBtn_milliSeconds) delay(100);
     if(pressLength_workCounterBtn_milliSeconds == 0 || (pressLength_workCounterBtn_milliSeconds >= optionThree_workCounterBtn_milliSeconds)){
       if(z <= a && a != 0){
-        z++;
+        if(pressLength_workCounterBtn_milliSeconds >= 35000){
+          z += 10;
+        }else z++;
         display3.showNumberDec(z);
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(3) > 0)
@@ -222,7 +244,9 @@ void workCounterSegment(){
     if(pressLength_workCounterBtn_milliSeconds < optionThree_workCounterBtn_milliSeconds) delay(100);
     if(pressLength_workCounterBtn_milliSeconds == 0 || (pressLength_workCounterBtn_milliSeconds >= optionThree_workCounterBtn_milliSeconds)){
       if(z > 0){
-        z--;
+        if(pressLength_workCounterBtn_milliSeconds >= 35000){
+          z -= 10;
+        }else z--;
       }else z = 0;
       display3.showNumberDec(z);
       //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
@@ -249,7 +273,11 @@ void spotCounterTargetSegment(){
   while(digitalRead(manualSwitchInput) == LOW && digitalRead(spotCounterTargetUpBtn) == LOW && digitalRead(resetBtn) != LOW){
     if(pressLength_spotCounterTargetBtn_milliSeconds < optionThree_spotCounterTargetBtn_milliSeconds) delay(100);
     if(pressLength_spotCounterTargetBtn_milliSeconds == 0 || (pressLength_spotCounterTargetBtn_milliSeconds >= optionThree_spotCounterTargetBtn_milliSeconds)){
-        y++;
+        if(pressLength_spotCounterTargetBtn_milliSeconds >= 35000){
+          y+=10;
+        }else{
+          y++;
+        }
         display2.showNumberDec(y);
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(2) > 0)
@@ -267,7 +295,9 @@ void spotCounterTargetSegment(){
     if(pressLength_spotCounterTargetBtn_milliSeconds < optionThree_spotCounterTargetBtn_milliSeconds) delay(100);
     if(pressLength_spotCounterTargetBtn_milliSeconds == 0 || (pressLength_spotCounterTargetBtn_milliSeconds >= optionThree_spotCounterTargetBtn_milliSeconds)){
         if(y > 0){
-          y--;
+          if(pressLength_spotCounterTargetBtn_milliSeconds >= 35000){
+            y -= 10;
+          }else y--;
         }else y = 0;
         display2.showNumberDec(y);
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
@@ -293,7 +323,9 @@ void workCounterTargetSegment(){
   while(digitalRead(manualSwitchInput) == LOW && digitalRead(workCounterTargetUpBtn) == LOW && digitalRead(resetBtn) != LOW){
     if(pressLength_workCounterTargetBtn_milliSeconds < optionThree_workCounterTargetBtn_milliSeconds) delay(100);
     if(pressLength_workCounterTargetBtn_milliSeconds == 0 || (pressLength_workCounterTargetBtn_milliSeconds >= optionThree_workCounterTargetBtn_milliSeconds)){
-        a++;
+        if(pressLength_workCounterTargetBtn_milliSeconds >= 35000){
+          a += 10;
+        }else a++;
         display4.showNumberDec(a);
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(4) > 0)
@@ -311,7 +343,9 @@ void workCounterTargetSegment(){
     if(pressLength_workCounterTargetBtn_milliSeconds < optionThree_workCounterTargetBtn_milliSeconds) delay(100);
     if(pressLength_workCounterTargetBtn_milliSeconds == 0 || (pressLength_workCounterTargetBtn_milliSeconds >= optionThree_workCounterTargetBtn_milliSeconds)){
         if(a > 0){
-          a--;
+          if(pressLength_workCounterTargetBtn_milliSeconds >= 35000){
+            a -= 10;
+          }else a--;
         }else a = 0;
         display4.showNumberDec(a);
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
