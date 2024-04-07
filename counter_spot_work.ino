@@ -9,7 +9,7 @@ const int spotCounterUpBtn = 12; // spot up count
 const int spotCounterDownBtn = 14; // spot down count
 float pressLength_spotCounterBtn_milliSeconds = 0;
 int optionTwo_spotCounterBtn_milliSeconds = 500;
-int optionThree_spotCounterBtn_milliSeconds = 2000;
+int optionThree_spotCounterBtn_milliSeconds = 1500;
 
 const int spot_swapDigit = 47;
 float pressLength_spotCounterTargetBtn_milliSeconds = 0;
@@ -24,14 +24,14 @@ const int spotCounterTargetUpBtn = 13; // spot target up
 const int spotCounterTargetDownBtn = 16; // spot target down
 float pressLength_workCounterBtn_milliSeconds = 0;
 int optionTwo_spotCounterTargetBtn_milliSeconds = 500;
-int optionThree_spotCounterTargetBtn_milliSeconds = 2000;
+int optionThree_spotCounterTargetBtn_milliSeconds = 1500;
 
 const int DIO3 = 53;
 const int CLK3 = 51;
 const int workCounterUpBtn = 29;
 const int workCounterDownBtn = 30;
 int optionTwo_workCounterBtn_milliSeconds = 500;
-int optionThree_workCounterBtn_milliSeconds = 2000;
+int optionThree_workCounterBtn_milliSeconds = 1500;
 
 const int DIO4 = 33;
 const int CLK4 = 31;
@@ -41,7 +41,7 @@ const int manualSwitchInput = 39;
 const int autoSwitchInput = 42;
 float pressLength_workCounterTargetBtn_milliSeconds = 0;
 int optionTwo_workCounterTargetBtn_milliSeconds = 500;
-int optionThree_workCounterTargetBtn_milliSeconds = 2000;
+int optionThree_workCounterTargetBtn_milliSeconds = 1500;
 
 int numCounter = 0;
 int spotCounterState = 0;
@@ -141,12 +141,13 @@ void spotCounterSegment(bool active){
   {
     if(pressLength_spotCounterBtn_milliSeconds < optionThree_spotCounterBtn_milliSeconds) delay(100);
     if(pressLength_spotCounterBtn_milliSeconds == 0 && y != 0 || (pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds && y != 0)){
-      if(pressLength_spotCounterBtn_milliSeconds >= (35000)){
+      if(pressLength_spotCounterBtn_milliSeconds >= 35000 && !active){
         x+=10;
-      }else{
+      }else if(pressLength_spotCounterBtn_milliSeconds == 0 && active){
         x++;
-      }
+      }else if(!active) x++;
       display.showNumberDec(x);
+
       //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
       if(EEPROM.read(1) > 0)
       {
@@ -211,7 +212,7 @@ void spotCounterSegment(bool active){
   } 
   if((pressLength_spotCounterBtn_milliSeconds + 400) >= optionTwo_spotCounterBtn_milliSeconds){
     pressLength_spotCounterBtn_milliSeconds = 0;
-  }else if(pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds){
+  }else if(pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds && !active){
     pressLength_spotCounterBtn_milliSeconds = 0;
   }
 }
