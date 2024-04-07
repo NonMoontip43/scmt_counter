@@ -158,6 +158,7 @@ void spotCounterSegment(bool active){
       }
       //*********************************
       if(x == y) {
+        delay(500);
         x = 0;
         if(a != 0 && z != a) {
           z++;
