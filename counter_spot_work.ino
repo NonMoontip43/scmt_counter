@@ -67,7 +67,6 @@ void setup()
   readEEPROM();
   set7segment();
   digitalWrite(buzzer,HIGH);
-  Serial.print('test');
 }
 
 void loop()
@@ -127,23 +126,10 @@ void updateIntToEEPROM(int address, int value) {
 }
 
 void readEEPROM(){
-  //read Data in EEPROM if have data is set data to parameter
-  // if(EEPROM.read(1) > 0)
-  // {
     x = EEPROM.read(1);
-  // }
-  // if(EEPROM.read(2) > 0)
-  // {
-    y = EEPROM.read(2);
-  // }  
-  // if(EEPROM.read(3) > 0)
-  // {
-    z = EEPROM.read(3);
-  // }  
-  // if(EEPROM.read(4) > 0)
-  // {
+    y = EEPROM.read(3);
+    z = EEPROM.read(2);
     a = EEPROM.read(4);
-  // }
 }
 
 void setPinMode(){
@@ -181,17 +167,19 @@ void spotCounterSegment(bool active){
     if(pressLength_spotCounterBtn_milliSeconds == 0 && y != 0 || (pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds && y != 0)){
       if(pressLength_spotCounterBtn_milliSeconds >= 35000 && !active){
         x+=10;
+        split = x;
       }else if(pressLength_spotCounterBtn_milliSeconds == 0 && active){
         x++;
+        split = x;
       }else if(!active) x++;
       display.showNumberDec(x);
       //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
       if(EEPROM.read(1) > 0)
       {
-        updateIntToEEPROM(1, lowByte(x));
+        updateIntToEEPROM(1 , x);
       }
       else{
-        writeIntToEEPROM(1, lowByte(x));
+        writeIntToEEPROM(1, x);
       }
       //*********************************
       if(x == y) {
@@ -203,10 +191,10 @@ void spotCounterSegment(bool active){
            //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(3) > 0)
           {
-            updateIntToEEPROM(3, lowByte(z));
+            updateIntToEEPROM(3, z);
           }
           else{
-            writeIntToEEPROM(3, lowByte(z));
+            writeIntToEEPROM(3, z);
           }
           //*********************************
         }
@@ -214,10 +202,10 @@ void spotCounterSegment(bool active){
          //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(1) > 0)
           {
-            updateIntToEEPROM(1, lowByte(x));
+            updateIntToEEPROM(1, x);
           }
           else{
-            writeIntToEEPROM(1, lowByte(x));
+            writeIntToEEPROM(1, x);
           }
           //*********************************
       }
@@ -239,10 +227,10 @@ void spotCounterSegment(bool active){
        //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(1) > 0)
           {
-            updateIntToEEPROM(1, lowByte(x));
+            updateIntToEEPROM(1, x);
           }
           else{
-            writeIntToEEPROM(1, lowByte(x));
+            writeIntToEEPROM(1, x);
           }
           //*********************************
     }
@@ -268,10 +256,10 @@ void workCounterSegment(){
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(3) > 0)
           {
-            updateIntToEEPROM(3, lowByte(z));
+            updateIntToEEPROM(3, z);
           }
           else{
-            writeIntToEEPROM(3, lowByte(z));
+            writeIntToEEPROM(3, z);
           }
           //*********************************
       }
@@ -291,10 +279,10 @@ void workCounterSegment(){
       //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(3) > 0)
           {
-            updateIntToEEPROM(3, lowByte(z));
+            updateIntToEEPROM(3, z);
           }
           else{
-            writeIntToEEPROM(3, lowByte(z));
+            writeIntToEEPROM(3, z);
           }
           //*********************************
     }
@@ -321,10 +309,10 @@ void spotCounterTargetSegment(){
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(2) > 0)
           {
-            updateIntToEEPROM(2, lowByte(y));
+            updateIntToEEPROM(2, y);
           }
           else{
-            writeIntToEEPROM(2, lowByte(y));
+            writeIntToEEPROM(2, y);
           }
           //*********************************
       }
@@ -342,10 +330,10 @@ void spotCounterTargetSegment(){
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(2) > 0)
           {
-            updateIntToEEPROM(2, lowByte(y));
+            updateIntToEEPROM(2, y);
           }
           else{
-            writeIntToEEPROM(2, lowByte(y));
+            writeIntToEEPROM(2, y);
           }
           //*********************************
       }
@@ -369,10 +357,10 @@ void workCounterTargetSegment(){
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(4) > 0)
           {
-            updateIntToEEPROM(4, lowByte(a));
+            updateIntToEEPROM(4, a);
           }
           else{
-            writeIntToEEPROM(4, lowByte(a));
+            writeIntToEEPROM(4, a);
           }
           //*********************************
       }
@@ -390,10 +378,10 @@ void workCounterTargetSegment(){
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(4) > 0)
           {
-            updateIntToEEPROM(4, lowByte(a));
+            updateIntToEEPROM(4, a);
           }
           else{
-            writeIntToEEPROM(4, lowByte(a));
+            writeIntToEEPROM(4, a);
           }
           //*********************************
       }
@@ -419,20 +407,20 @@ void resetButton(){
       //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(1) > 0)
           {
-            updateIntToEEPROM(1, lowByte(x));
+            updateIntToEEPROM(1, x);
           }
           else{
-            writeIntToEEPROM(1, lowByte(x));
+            writeIntToEEPROM(1, x);
           }
           //*********************************
       display3.showNumberDec(z);
        //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(3) > 0)
           {
-            updateIntToEEPROM(3, lowByte(z));
+            updateIntToEEPROM(3, z);
           }
           else{
-            writeIntToEEPROM(3, lowByte(z));
+            writeIntToEEPROM(3, z);
           }
           //*********************************
       pressLength_milliSeconds = 0;
