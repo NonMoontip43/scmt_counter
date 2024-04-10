@@ -173,10 +173,8 @@ void spotCounterSegment(bool active){
     if(pressLength_spotCounterBtn_milliSeconds == 0 && y != 0 || (pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds && y != 0)){
       if(pressLength_spotCounterBtn_milliSeconds >= 35000 && !active){
         x+=10;
-        split = x;
       }else if(pressLength_spotCounterBtn_milliSeconds == 0 && active){
         x++;
-        split = x;
       }else if(!active) x++;
       display.showNumberDec(x);
       //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
