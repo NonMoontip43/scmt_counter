@@ -110,23 +110,20 @@ void autoMode(){
 
 // Function to write an int value to EEPROM
 void writeIntToEEPROM(int address, int value) {
-  byte byte1 = (value >> 8) & 0xFF; // Extract the upper byte
-  byte byte2 = value & 0xFF;         // Extract the lower byte
 
-  EEPROM.write(address, byte1);      // Write the upper byte
-  EEPROM.write(address + 1, byte2);  // Write the lower byte
+  EEPROM.write(address, highByte(value));      // Write the upper byte
+  EEPROM.write(address + 1, lowByte(value));  // Write the lower byte
 }
 // Function to write an int value to EEPROM
 void updateIntToEEPROM(int address, int value) {
-  byte byte1 = (value >> 8) & 0xFF; // Extract the upper byte
-  byte byte2 = value & 0xFF;         // Extract the lower byte
-
-  EEPROM.update(address, byte1);      // Write the upper byte
-  EEPROM.update(address + 1, byte2);  // Write the lower byte
+  EEPROM.update(address, highByte(value));      // Write the upper byte
+  EEPROM.update(address + 1, lowByte(value));  // Write the lower byte
 }
 
 void readEEPROM(){
-    x = EEPROM.read(1);
+    highX = EEPROM.read(1);
+    lowX = EEPROM.read(2);
+    x =  (highX << 8) | lowX; 
     y = EEPROM.read(3);
     z = EEPROM.read(2);
     a = EEPROM.read(4);
