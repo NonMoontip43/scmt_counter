@@ -110,13 +110,13 @@ void autoMode(){
 }
 
 // Function to write an int value to EEPROM
-void writeIntToEEPROM(int address, int value) {
+void writeIntToEEPROM(int address, long value) {
 
   EEPROM.write(address, highByte(value));      // Write the upper byte
   EEPROM.write(address + 1, lowByte(value));  // Write the lower byte
 }
 // Function to write an int value to EEPROM
-void updateIntToEEPROM(int address, int value) {
+void updateIntToEEPROM(int address, long value) {
   EEPROM.update(address, highByte(value));      // Write the upper byte
   EEPROM.update(address + 1, lowByte(value));  // Write the lower byte
 }
@@ -130,7 +130,7 @@ void readEEPROM(){
     y =(highY << 8) | lowY;
     int highZ= EEPROM.read(5);
     int lowZ = EEPROM.read(6);
-    z = (lowZ << 8) | lowZ;
+    z = (highZ << 8) | lowZ;
     int highA= EEPROM.read(7);
     int lowA = EEPROM.read(8);
     a = (highA << 8) | lowA;
@@ -171,6 +171,7 @@ void spotCounterSegment(bool active){
     if(pressLength_spotCounterBtn_milliSeconds == 0 && y != 0 || (pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds && y != 0)){
       if(pressLength_spotCounterBtn_milliSeconds >= 35000 && !active){
         x+=10;
+        if(x > y) x = y;
       }else if(pressLength_spotCounterBtn_milliSeconds == 0 && active){
         x++;
       }else if(!active) x++;
@@ -184,7 +185,9 @@ void spotCounterSegment(bool active){
         writeIntToEEPROM(1, x);
       }
       //*********************************
-      if(x == y) {
+      Serial.println(x);
+      Serial.println(y);
+      if(x >= y) {
         delay(500);
         x = 0;
         if(a != 0 && z != a) {
@@ -253,6 +256,7 @@ void workCounterSegment(){
       if(z <= a && a != 0){
         if(pressLength_workCounterBtn_milliSeconds >= 35000){
           z += 10;
+          if(z > a) z = a;
         }else z++;
         display3.showNumberDec(z);
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
