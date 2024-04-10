@@ -53,6 +53,7 @@ int y = 0; // spotCounterTarget
 int z = 0; // workCounter
 int a = 0; // workCounterTarget
 
+
 const int buzzer = 26;
 
 TM1637Display display(CLK, DIO); //set up the 4-Digit Display.
@@ -121,20 +122,17 @@ void updateIntToEEPROM(int address, int value) {
 }
 
 void readEEPROM(){
-    highX = EEPROM.read(1);
-    lowX = EEPROM.read(2);
+    int highX = EEPROM.read(1);
+    int lowX = EEPROM.read(2);
     x =  (highX << 8) | lowX; 
-    Serial.print(x);
-    highY = EEPROM.read(3);
-    lowY = EEPROM.read(4);
+    int highY = EEPROM.read(3);
+    int lowY = EEPROM.read(4);
     y =(highY << 8) | lowY;
-    Serial.print(y);
-     highZ= EEPROM.read(5);
-    lowZ = EEPROM.read(6);
+    int highZ= EEPROM.read(5);
+    int lowZ = EEPROM.read(6);
     z = (lowZ << 8) | lowZ;
-    Serial.print(z);
-    highA= EEPROM.read(7);
-    lowA = EEPROM.read(8);
+    int highA= EEPROM.read(7);
+    int lowA = EEPROM.read(8);
     a = (highA << 8) | lowA;
 }
 
