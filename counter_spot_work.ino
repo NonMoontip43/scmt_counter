@@ -6,7 +6,7 @@ const int autoInput = 10;
 const int CLK = 3; //Set the CLK pin connection to the display
 const int DIO = 2; //Set the DIO pin connection to the display
 const int spotCounterUpBtn = 12; // spot up count
-const int spotCounterDownBtn = 14; // spot down count
+const int spotCounterDownBtn = 22; // spot down count
 float pressLength_spotCounterBtn_milliSeconds = 0;
 int optionTwo_spotCounterBtn_milliSeconds = 500;
 int optionThree_spotCounterBtn_milliSeconds = 1500;
@@ -21,7 +21,7 @@ int optionTwo_milliSeconds = 2000;
 const int DIO2 = 7;
 const int CLK2 = 5;
 const int spotCounterTargetUpBtn = 13; // spot target up
-const int spotCounterTargetDownBtn = 16; // spot target down
+const int spotCounterTargetDownBtn = 23; // spot target down
 float pressLength_workCounterBtn_milliSeconds = 0;
 int optionTwo_spotCounterTargetBtn_milliSeconds = 500;
 int optionThree_spotCounterTargetBtn_milliSeconds = 1500;
@@ -79,6 +79,7 @@ void loop()
     spotCounterSegment(false); //Function นับจำนวน Spot เมื่อมีการ กด Button Spot + เพิ่มขึ้น
     resetButton();
     buzzerLimit();
+    Serial.print(digitalRead(spotCounterDownBtn));
 }
 
 void autoMode(){
@@ -112,8 +113,8 @@ void autoMode(){
 // Function to write an int value to EEPROM
 void writeIntToEEPROM(int address, long value) {
 
-  EEPROM.write(address, highByte(value));      // Write the upper byte
-  EEPROM.write(address + 1, lowByte(value));  // Write the lower byte
+  EEPROM.put(address, highByte(value));      // Write the upper byte
+  EEPROM.put(address + 1, lowByte(value));  // Write the lower byte
 }
 // Function to write an int value to EEPROM
 void updateIntToEEPROM(int address, long value) {
@@ -185,10 +186,8 @@ void spotCounterSegment(bool active){
         writeIntToEEPROM(1, x);
       }
       //*********************************
-      Serial.println(x);
-      Serial.println(y);
       if(x >= y) {
-        delay(500);
+        delay(50);
         x = 0;
         if(a != 0 && z != a) {
           z++;
