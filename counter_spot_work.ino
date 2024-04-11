@@ -53,6 +53,7 @@ int y = 0; // spotCounterTarget
 int z = 0; // workCounter
 int a = 0; // workCounterTarget
 
+const uint8_t blank[] = {0x00, 0x00, 0x00, 0x00};
 
 const int buzzer = 26;
 
@@ -60,6 +61,11 @@ TM1637Display display(CLK, DIO); //set up the 4-Digit Display.
 TM1637Display display2(CLK2, DIO2); //set up the 4-Digit Display.
 TM1637Display display3(CLK3, DIO3); //set up the 4-Digit Display.
 TM1637Display display4(CLK4, DIO4); //set up the 4-Digit Display.
+
+const uint8_t done[] = {
+  SEG_C | SEG_E | SEG_G,                           // n
+  SEG_A | SEG_B | SEG_C | SEG_E | SEG_F | SEG_G    // A
+};
 
 void setup()
 {
@@ -100,14 +106,15 @@ void autoMode(){
     || digitalRead(resetBtn) == LOW
     ) && digitalRead(autoSwitchInput) == LOW) 
   ){
-    digitalWrite(buzzer, LOW);
-    delay(100);
-    digitalWrite(buzzer, HIGH);
-    delay(100);
-    digitalWrite(buzzer, LOW);
-    delay(100);
-    digitalWrite(buzzer, HIGH);
+    display.setSegments(done , 2, 2);
+    display2.setSegments(done , 2, 2);
+    display3.setSegments(done ,2 ,2);
+    display4.setSegments(done ,2 ,2);
   }
+  display.showNumberDec(x);
+    display2.showNumberDec(y);
+    display3.showNumberDec(z);
+    display4.showNumberDec(a);
 }
 
 // Function to write an int value to EEPROM
