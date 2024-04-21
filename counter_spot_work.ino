@@ -4,8 +4,10 @@
 const int autoInput = 10;
 
 const int outputInterlock = 45;
+int interlockDelay = 1000;
 
 const int outputAlarmReset = 46;
+int alarmResetDelay = 1000;
 
 const int CLK = 3; //Set the CLK pin connection to the display
 const int DIO = 2; //Set the DIO pin connection to the display
@@ -78,12 +80,13 @@ void setup()
   readEEPROM();
   set7segment();
   digitalWrite(buzzer,HIGH);
-  weldingInterLock();
-  alarmReset();
+  digitalWrite(outputAlarmReset,HIGH);
+  digitalWrite(outputInterlock,HIGH);
 }
 
 void loop()
 {
+    weldingInterLock();
     autoMode();
     spotCounterTargetSegment();
     workCounterTargetSegment();
@@ -94,11 +97,18 @@ void loop()
 }
 
 void weldingInterLock(){
-  digitalWrite(outputInterlock,LOW);
+  if(z == a && z != 0 && a != 0){
+    delay(interlockDelay); //interlock-delay
+    digitalWrite(outputInterlock, HIGH);
+  }else{
+    digitalWrite(outputInterlock,LOW);
+  }
 }
 
 void alarmReset(){
-  digitalWrite(outputAlarmReset,HIGH);
+  digitalWrite(outputAlarmReset, LOW);
+  delay(700);
+  digitalWrite(outputAlarmReset, HIGH);
 }
 
 void autoMode(){
@@ -452,20 +462,16 @@ void resetButton(){
           //*********************************
       pressLength_milliSeconds = 0;
       weldingInterLock();
-
-      digitalWrite(outputAlarmReset, LOW);
-      delay(700);
-      digitalWrite(outputAlarmReset, HIGH);
+      alarmReset();
     } 
   }
 }
 
 void buzzerLimit(){
+  weldingInterLock();
   // work = workTarget
   while (digitalRead(resetBtn) != LOW && z == a && z != 0 && a != 0)
   {
-    delay(1000); //interlock-delay
-    digitalWrite(outputInterlock, HIGH);
     digitalWrite(buzzer, LOW);
     delay(500);
   }
