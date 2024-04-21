@@ -4,7 +4,9 @@
 const int autoInput = 10;
 
 const int outputInterlock = 45;
-int interlockDelay = 1000;
+int interlockDelay = 5000;
+int buzzerTrickInterlock = 0;
+
 
 const int outputAlarmReset = 46;
 int alarmResetDelay = 700;
@@ -22,7 +24,7 @@ float pressLength_spotCounterTargetBtn_milliSeconds = 0;
 
 const int resetBtn = 8;
 float pressLength_milliSeconds = 0;
-int optionTwo_milliSeconds = 1000; 
+int optionTwo_milliSeconds = 2000; 
 
 const int DIO2 = 7;
 const int CLK2 = 5;
@@ -102,6 +104,7 @@ void weldingInterLock(bool canReset){
       digitalWrite(outputInterlock, HIGH);
     }else if (canReset == true){
       digitalWrite(outputInterlock,LOW);
+      buzzerTrickInterlock=0;
     }else digitalWrite(outputInterlock, HIGH);
 }
 
@@ -437,6 +440,7 @@ void resetButton(){
     delay(100);
     pressLength_milliSeconds = pressLength_milliSeconds + 100;
     if(pressLength_milliSeconds >= optionTwo_milliSeconds){
+      if(z==a && z!=0 && a!=0) alarmReset();
       x = 0;
       z = 0;
       digitalWrite(buzzer,HIGH);
@@ -462,18 +466,22 @@ void resetButton(){
           //*********************************
       pressLength_milliSeconds = 0;
       weldingInterLock(true);
-      alarmReset();
     } 
   }
 }
+
 
 void buzzerLimit(){
   // work = workTarget
   while (digitalRead(resetBtn) != LOW && z == a && z != 0 && a != 0)
   {
-    weldingInterLock(false);
     digitalWrite(buzzer, LOW);
     delay(500);
+    buzzerTrickInterlock++;
+    if(buzzerTrickInterlock == 1){
+      delay(interlockDelay);
+      digitalWrite(outputInterlock, HIGH);
+    }
   }
 }
 // void spotCounterTargetSegment(){
