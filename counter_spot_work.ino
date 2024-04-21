@@ -7,7 +7,7 @@ const int outputInterlock = 45;
 int interlockDelay = 1000;
 
 const int outputAlarmReset = 46;
-int alarmResetDelay = 1000;
+int alarmResetDelay = 700;
 
 const int CLK = 3; //Set the CLK pin connection to the display
 const int DIO = 2; //Set the DIO pin connection to the display
@@ -22,7 +22,7 @@ float pressLength_spotCounterTargetBtn_milliSeconds = 0;
 
 const int resetBtn = 8;
 float pressLength_milliSeconds = 0;
-int optionTwo_milliSeconds = 2000; 
+int optionTwo_milliSeconds = 1000; 
 
 const int DIO2 = 7;
 const int CLK2 = 5;
@@ -86,7 +86,7 @@ void setup()
 
 void loop()
 {
-    weldingInterLock();
+    weldingInterLock(z == a && z != 0 && a != 0 ? false : true);
     autoMode();
     spotCounterTargetSegment();
     workCounterTargetSegment();
@@ -96,18 +96,18 @@ void loop()
     buzzerLimit();
 }
 
-void weldingInterLock(){
-  if(z == a && z != 0 && a != 0){
-    delay(interlockDelay); //interlock-delay
-    digitalWrite(outputInterlock, HIGH);
-  }else{
-    digitalWrite(outputInterlock,LOW);
-  }
+void weldingInterLock(bool canReset){
+    if(canReset == false && z == a && z != 0 && a != 0){
+      if(digitalRead(resetBtn) != LOW) delay(interlockDelay); //interlock-delay
+      digitalWrite(outputInterlock, HIGH);
+    }else if (canReset == true){
+      digitalWrite(outputInterlock,LOW);
+    }else digitalWrite(outputInterlock, HIGH);
 }
 
 void alarmReset(){
   digitalWrite(outputAlarmReset, LOW);
-  delay(700);
+  delay(alarmResetDelay);
   digitalWrite(outputAlarmReset, HIGH);
 }
 
@@ -461,17 +461,17 @@ void resetButton(){
           }
           //*********************************
       pressLength_milliSeconds = 0;
-      weldingInterLock();
+      weldingInterLock(true);
       alarmReset();
     } 
   }
 }
 
 void buzzerLimit(){
-  weldingInterLock();
   // work = workTarget
   while (digitalRead(resetBtn) != LOW && z == a && z != 0 && a != 0)
   {
+    weldingInterLock(false);
     digitalWrite(buzzer, LOW);
     delay(500);
   }
