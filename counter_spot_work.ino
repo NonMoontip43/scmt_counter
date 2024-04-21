@@ -3,6 +3,10 @@
 
 const int autoInput = 10;
 
+const int outputInterlock = 45;
+
+const int outputAlarmReset = 46;
+
 const int CLK = 3; //Set the CLK pin connection to the display
 const int DIO = 2; //Set the DIO pin connection to the display
 const int spotCounterUpBtn = 12; // spot up count
@@ -74,6 +78,8 @@ void setup()
   readEEPROM();
   set7segment();
   digitalWrite(buzzer,HIGH);
+  weldingInterLock();
+  alarmReset();
 }
 
 void loop()
@@ -85,7 +91,14 @@ void loop()
     spotCounterSegment(false); //Function นับจำนวน Spot เมื่อมีการ กด Button Spot + เพิ่มขึ้น
     resetButton();
     buzzerLimit();
-    Serial.print(digitalRead(spotCounterDownBtn));
+}
+
+void weldingInterLock(){
+  digitalWrite(outputInterlock,LOW);
+}
+
+void alarmReset(){
+  digitalWrite(outputAlarmReset,HIGH);
 }
 
 void autoMode(){
@@ -145,6 +158,8 @@ void readEEPROM(){
 }
 
 void setPinMode(){
+  pinMode(outputAlarmReset, OUTPUT);
+  pinMode(outputInterlock, OUTPUT);
   pinMode(autoInput, INPUT_PULLUP);
   pinMode(spotCounterUpBtn, INPUT_PULLUP);
   pinMode(spotCounterDownBtn, INPUT_PULLUP);
@@ -436,6 +451,11 @@ void resetButton(){
           }
           //*********************************
       pressLength_milliSeconds = 0;
+      weldingInterLock();
+
+      digitalWrite(outputAlarmReset, LOW);
+      delay(700);
+      digitalWrite(outputAlarmReset, HIGH);
     } 
   }
 }
@@ -444,9 +464,11 @@ void buzzerLimit(){
   // work = workTarget
   while (digitalRead(resetBtn) != LOW && z == a && z != 0 && a != 0)
   {
+    delay(1000); //interlock-delay
+    digitalWrite(outputInterlock, HIGH);
     digitalWrite(buzzer, LOW);
+    delay(500);
   }
-  
 }
 // void spotCounterTargetSegment(){
 //   while(digitalRead(spotCounterTargetBtn) == HIGH && digitalRead(manual) == HIGH){
