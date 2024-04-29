@@ -4,7 +4,7 @@
 const int autoInput = 10;
 
 const int outputInterlock = 45;
-int interlockDelay = 5000;
+int interlockDelay = 0;
 int buzzerTrickInterlock = 0;
 
 
@@ -203,7 +203,7 @@ void set7segment(){
 void spotCounterSegment(bool active){
   while((digitalRead(spotCounterUpBtn) == LOW && digitalRead(manualSwitchInput) == LOW) || (digitalRead(autoInput) == LOW && active))
   {
-    if(pressLength_spotCounterBtn_milliSeconds < optionThree_spotCounterBtn_milliSeconds) delay(100);
+    // if(pressLength_spotCounterBtn_milliSeconds < optionThree_spotCounterBtn_milliSeconds) delay(100);
     if(pressLength_spotCounterBtn_milliSeconds == 0 && y != 0 || (pressLength_spotCounterBtn_milliSeconds >= optionThree_spotCounterBtn_milliSeconds && y != 0)){
       if(pressLength_spotCounterBtn_milliSeconds >= 35000 && !active){
         x+=10;
@@ -227,6 +227,7 @@ void spotCounterSegment(bool active){
         if(a != 0 && z != a) {
           z++;
           display3.showNumberDec(z);
+          if(z == a) digitalWrite(outputInterlock, HIGH);
            //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
           if(EEPROM.read(5) > 0)
           {
@@ -285,12 +286,14 @@ void spotCounterSegment(bool active){
 void workCounterSegment(){
   while(digitalRead(workCounterUpBtn) == LOW && digitalRead(manualSwitchInput) == LOW)
   {
-    if(pressLength_workCounterBtn_milliSeconds < optionThree_workCounterBtn_milliSeconds) delay(100);
+    // if(pressLength_workCounterBtn_milliSeconds < optionThree_workCounterBtn_milliSeconds) delay(100);
     if(pressLength_workCounterBtn_milliSeconds == 0 || (pressLength_workCounterBtn_milliSeconds >= optionThree_workCounterBtn_milliSeconds)){
       if(z <= a && a != 0){
         if(pressLength_workCounterBtn_milliSeconds >= 35000){
           z += 10;
-          if(z > a) z = a;
+          if(z > a) {
+            z = a;
+          }
         }else z++;
         display3.showNumberDec(z);
         //EEPROM Check When have data is update EEPROM if not have data is write to address EEPROM
